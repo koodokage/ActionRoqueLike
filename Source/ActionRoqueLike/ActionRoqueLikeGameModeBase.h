@@ -13,5 +13,15 @@ UCLASS()
 class ACTIONROQUELIKE_API AActionRoqueLikeGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+
+public:
+	AActionRoqueLikeGameModeBase()
+	{
+		static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ActionRogueLike/Character/Blueprints/BP_ThirdPersonCharacter"));
+		if (PlayerPawnBPClass.Class != NULL)
+		{
+			DefaultPawnClass = PlayerPawnBPClass.Class;
+		}
+	}
 	
 };

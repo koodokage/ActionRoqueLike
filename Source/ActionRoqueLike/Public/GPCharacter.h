@@ -21,11 +21,15 @@ protected:
 	class USpringArmComponent* m_SpringArmComp;
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* m_CameraComp;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> m_ProjectileClass;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	void MoveForward(float value);
+	void MoveRight(float value);
+	void PrimaryAttack();
 
 public:	
 	// Called every frame

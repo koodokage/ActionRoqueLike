@@ -4,16 +4,24 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/InputComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AGPCharacter::AGPCharacter(){
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bUseControllerRotationYaw = false;
+
 
 	m_SpringArmComp = CreateDefaultSubobject<USpringArmComponent>("Spring Arm Component");
 	m_SpringArmComp->SetupAttachment(RootComponent);
+	m_SpringArmComp->TargetArmLength = 550.f;
+	m_SpringArmComp->bUsePawnControlRotation = true;
+
 	m_CameraComp = CreateDefaultSubobject<UCameraComponent>("Camera Component");
 	m_CameraComp->SetupAttachment(m_SpringArmComp);
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 }
 
@@ -25,7 +33,31 @@ void AGPCharacter::BeginPlay(){
 
 void AGPCharacter::MoveForward(float value){
 
-	AddMovementInput(GetActorForwardVector(), value);
+	FRotator rotation = GetControlRotation();
+	rotation.Roll = 0.f;
+	rotation.Pitch = 0.f;
+
+	AddMovementInput(rotation.Vector(), value);
+}
+
+void AGPCharacter::MoveRight(float value){
+	
+	FRotator rotation = GetControlRotation();
+	rotation.Roll = 0.f;
+	rotation.Pitch = 0.f;
+
+	FVector rightVector = FRotationMatrix(rotation).GetScaledAxis(EAxis::Y);
+
+	AddMovementInput(rightVector, value);
+}
+
+void AGPCharacter::PrimaryAttack(){
+
+	FTransform WeaponTM = FTransform(GetControlRotation(),GetActorLocation());
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	GetWorld()->SpawnActor<AActor>(m_ProjectileClass,WeaponTM,SpawnParams);
 }
 
 // Called every frame
@@ -39,11 +71,11 @@ void AGPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGPCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AGPCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &AGPCharacter::AddControllerYawInput);
-	APlayerController* controller = Cast<APlayerController>(GetController());
-	ULocalPlayer* localPlayer = controller->GetLocalPlayer();
+	PlayerInputComponent->BindAxis("LookUp", this, &AGPCharacter::AddControllerPitchInput);
 
-
+	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed,this, &AGPCharacter::PrimaryAttack);
 
 }
 

@@ -13,15 +13,17 @@ AGPBulletProjectile::AGPBulletProjectile()
 	PrimaryActorTick.bCanEverTick = true;
 
 	m_SphereComp = CreateDefaultSubobject<USphereComponent>("Sphere Component");
+	m_SphereComp->SetCollisionProfileName("Projectile");
 	RootComponent = m_SphereComp;
 
 	m_Particle = CreateDefaultSubobject<UParticleSystemComponent>("VFX");
 	m_Particle->SetupAttachment(m_SphereComp);
 
 	m_ProjectileComp = CreateDefaultSubobject<UProjectileMovementComponent>("Projectile Component");
-	m_ProjectileComp->InitialSpeed = 1000.f;
+	m_ProjectileComp->InitialSpeed = 3500.f;
 	m_ProjectileComp->bRotationFollowsVelocity = true;
 	m_ProjectileComp->bInitialVelocityInLocalSpace = true;
+	m_ProjectileComp->ProjectileGravityScale = 0.0f;
 }
 
 // Called when the game starts or when spawned

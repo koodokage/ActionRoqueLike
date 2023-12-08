@@ -1,10 +1,10 @@
 // UNREAL ENGINE ROQUE LIKE GAME PROJECT 
 
-#include "GPCharacter.h"
 #include "Camera/CameraComponent.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "GPCharacter.h"
 
 // Sets default values
 AGPCharacter::AGPCharacter(){
@@ -53,11 +53,14 @@ void AGPCharacter::MoveRight(float value){
 
 void AGPCharacter::PrimaryAttack(){
 
-	FTransform WeaponTM = FTransform(GetControlRotation(),GetActorLocation());
+	FVector muzzleLocation = GetMesh()->GetSocketLocation("gun_muzzle");
+	FRotator muzzleRotation  = GetMesh()->GetSocketRotation("gun_muzzle");
+
+	FTransform weaponTransform = FTransform(muzzleRotation, muzzleLocation);
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	GetWorld()->SpawnActor<AActor>(m_ProjectileClass,WeaponTM,SpawnParams);
+	GetWorld()->SpawnActor<AActor>(m_ProjectileClass,weaponTransform,SpawnParams);
 }
 
 // Called every frame
@@ -76,6 +79,7 @@ void AGPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis("LookUp", this, &AGPCharacter::AddControllerPitchInput);
 
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed,this, &AGPCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction("Jump",IE_Pressed, this, &AGPCharacter::Jump);
 
 }
 

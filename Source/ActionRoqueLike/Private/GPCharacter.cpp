@@ -1,10 +1,10 @@
 // UNREAL ENGINE ROQUE LIKE GAME PROJECT 
 
+#include "GPCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "GPCharacter.h"
 
 // Sets default values
 AGPCharacter::AGPCharacter(){

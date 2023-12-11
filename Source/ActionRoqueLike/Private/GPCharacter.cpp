@@ -1,10 +1,12 @@
 // UNREAL ENGINE ROQUE LIKE GAME PROJECT 
 
-#include "GPCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GPCharacter.h"
+#include "GPInteractionComponent.h"
+
 
 // Sets default values
 AGPCharacter::AGPCharacter(){
@@ -22,6 +24,8 @@ AGPCharacter::AGPCharacter(){
 	m_CameraComp->SetupAttachment(m_SpringArmComp);
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+
+	m_InteractionComp = CreateDefaultSubobject<UGPInteractionComponent>("Interaction Component");
 
 }
 
@@ -63,6 +67,11 @@ void AGPCharacter::PrimaryAttack(){
 	GetWorld()->SpawnActor<AActor>(m_ProjectileClass,weaponTransform,SpawnParams);
 }
 
+void AGPCharacter::PrimaryInteract(){
+
+	m_InteractionComp->Interact();
+}
+
 // Called every frame
 void AGPCharacter::Tick(float DeltaTime){
 	Super::Tick(DeltaTime);
@@ -78,7 +87,8 @@ void AGPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis("Turn", this, &AGPCharacter::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &AGPCharacter::AddControllerPitchInput);
 
-	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed,this, &AGPCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &AGPCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed,this, &AGPCharacter::PrimaryInteract);
 	PlayerInputComponent->BindAction("Jump",IE_Pressed, this, &AGPCharacter::Jump);
 
 }

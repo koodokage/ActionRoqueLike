@@ -9,27 +9,26 @@
 AGPExlplosiveObject::AGPExlplosiveObject()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
-
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh Component");
 	RootComponent = Mesh;
+
 	RadialForceComponent = CreateDefaultSubobject<URadialForceComponent>("Radial Force Component");
 	RadialForceComponent->SetupAttachment(Mesh);
 
+}
+
+void AGPExlplosiveObject::PostInitializeComponents(){
+	Super::PostInitializeComponents();
+	Mesh->OnComponentHit.AddDynamic(this,&AGPExlplosiveObject::OnCollisionHit);
+	UE_LOG(LogTemp, Display, TEXT("INITIALIZED"));
 
 }
 
-// Called when the game starts or when spawned
-void AGPExlplosiveObject::BeginPlay()
-{
-	Super::BeginPlay();
-	
+
+void AGPExlplosiveObject::OnCollisionHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	FVector NormalImpulse, const FHitResult& Hit){
+
+	UE_LOG(LogTemp,Display,TEXT("HITTED"));
+	FString combinedText = FString::Printf(TEXT("LOCATION : %s"),*Hit.ImpactPoint.ToString());
+	DrawDebugString(GetWorld(),Hit.ImpactPoint,combinedText,nullptr,FColor::Red);
 }
-
-// Called every frame
-void AGPExlplosiveObject::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-

@@ -53,7 +53,7 @@ void UGPInteractionComponent::Interact(){
 	//SPHERE TRACE
 	TArray<FHitResult> hits;
 	FCollisionShape collisionShape;
-	collisionShape.SetSphere(30.f);
+	collisionShape.SetSphere(m_DetectionRadius);
 	GetWorld()->SweepMultiByObjectType(hits, eyeLocation, end, FQuat::Identity, queryParams, collisionShape);
 
 	for (FHitResult result : hits)
@@ -65,12 +65,12 @@ void UGPInteractionComponent::Interact(){
 
 				APawn* pawn = Cast<APawn>(owner);
 				IGPInteractableInterface::Execute_Interact(hitActor, pawn);
-				DrawDebugSphere(GetWorld(),result.ImpactPoint,30.f,10,FColor::Green,false,.5f,0U,1);
+				DrawDebugSphere(GetWorld(),result.ImpactPoint, m_DetectionRadius,10,FColor::Green,false,.5f,0U,1);
 				continue;
 			}
 		}
 
-		DrawDebugSphere(GetWorld(), result.ImpactPoint, 30.f, 10, FColor::Red, false, .5f, 0U, 1);
+		DrawDebugSphere(GetWorld(), result.ImpactPoint, m_DetectionRadius, 10, FColor::Red, false, .5f, 0U, 1);
 	}
 
 

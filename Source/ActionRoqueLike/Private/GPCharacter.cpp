@@ -7,7 +7,6 @@
 #include "GPCharacter.h"
 #include "GPInteractionComponent.h"
 
-
 // Sets default values
 AGPCharacter::AGPCharacter(){
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -27,12 +26,13 @@ AGPCharacter::AGPCharacter(){
 
 	m_InteractionComp = CreateDefaultSubobject<UGPInteractionComponent>("Interaction Component");
 
+	GetMesh()->GetAnimInstance()->OnPlayMontageNotifyBegin.AddDynamic(this, &AGPCharacter::MontageEvent);
 }
+
 
 // Called when the game starts or when spawned
 void AGPCharacter::BeginPlay(){
 	Super::BeginPlay();
-	
 }
 
 void AGPCharacter::MoveForward(float value){
@@ -57,19 +57,63 @@ void AGPCharacter::MoveRight(float value){
 
 void AGPCharacter::PrimaryAttack(){
 
+	PlayAnimMontage(m_PrimaryAttackAnim); 
+
 	FVector muzzleLocation = GetMesh()->GetSocketLocation("gun_muzzle");
-	FRotator muzzleRotation  = GetMesh()->GetSocketRotation("gun_muzzle");
+	FRotator muzzleRotation;
+
+	FVector location;
+	FRotator rotation;
+	FVector endLocation = GetCameraViewPoint(location,rotation);
+
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(this);
+	FHitResult hit;
+
+	bool anyHit = GetWorld()->LineTraceSingleByChannel(
+		hit,
+		location, 
+		endLocation,
+		ECC_Visibility,params);
+
+	if (anyHit) {
+
+		muzzleRotation = GetLookRotation(muzzleLocation,hit.ImpactPoint);
+		DrawDebugLine(GetWorld(), location, hit.ImpactPoint, FColor::Blue, false, 1.0f, 0, 1.0f);
+	}
+	else {
+		muzzleRotation = GetLookRotation(muzzleLocation, endLocation);
+		DrawDebugLine(GetWorld(), location, endLocation, FColor::Red, false, 1.0f, 0, 1.0f);
+	}
 
 	FTransform weaponTransform = FTransform(muzzleRotation, muzzleLocation);
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Instigator = this;
+	SpawnParams.Owner = this;
+	GetWorld()->SpawnActor<AActor>(m_ProjectileClass, weaponTransform, SpawnParams);
 
-	GetWorld()->SpawnActor<AActor>(m_ProjectileClass,weaponTransform,SpawnParams);
 }
+
+void AGPCharacter::MagicAttack(){
+
+	PlayAnimMontage(m_MagicAttackAnim);
+}
+
 
 void AGPCharacter::PrimaryInteract(){
 
 	m_InteractionComp->Interact();
+}
+
+
+
+void AGPCharacter::MontageEvent(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload){
+
+	if (NotifyName == FName("Special")) {
+		GEngine->AddOnScreenDebugMessage(1, 2, FColor::Green,TEXT("OK"));
+	}
+
 }
 
 // Called every frame
@@ -84,12 +128,14 @@ void AGPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGPCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGPCharacter::MoveRight);
+	PlayerInputComponent->BindAction("Jump",IE_Pressed, this, &AGPCharacter::Jump);
+
 	PlayerInputComponent->BindAxis("Turn", this, &AGPCharacter::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &AGPCharacter::AddControllerPitchInput);
 
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &AGPCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction("MagicAttack", IE_Pressed, this, &AGPCharacter::MagicAttack);
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed,this, &AGPCharacter::PrimaryInteract);
-	PlayerInputComponent->BindAction("Jump",IE_Pressed, this, &AGPCharacter::Jump);
 
 }
 

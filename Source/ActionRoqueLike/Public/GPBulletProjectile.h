@@ -17,7 +17,7 @@ public:
 
 protected:
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	class USphereComponent* m_SphereComp;
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* m_ProjectileComp;
@@ -30,5 +30,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+
 
 };

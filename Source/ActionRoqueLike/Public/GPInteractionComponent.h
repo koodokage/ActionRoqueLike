@@ -19,6 +19,8 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	UPROPERTY(EditAnywhere)
+	float m_DetectionRadius = 30.0f;
 
 public:	
 	// Called every frame
